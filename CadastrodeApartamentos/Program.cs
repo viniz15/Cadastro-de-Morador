@@ -11,14 +11,12 @@ public class MyClass
     {
         MyClass myClass = new MyClass();
 
-        Connection();
         Iniciar();
 
     }
 
     static void Iniciar()
     {
-        List<string> listaMoradores = new List<string>();
 
         bool funcionando = true;
 
@@ -47,15 +45,15 @@ public class MyClass
                     do
                     {
                         Console.WriteLine("Digite o nome do Morador: ");
-                        String nome = Console.ReadLine();
+                        String nome = (Console.ReadLine() ?? "");
                         Console.WriteLine("Digite o andar do Apartamento: ");
                         int andar = int.Parse(Console.ReadLine());
                         Console.WriteLine("Digiter o Numero do Apartamento: ");
                         int apto = int.Parse(Console.ReadLine());
 
-                        Console.WriteLine("Há mais algum Morador nesse apartamento?");
+                        Console.WriteLine("Há mais algum Morador para cadastrar?");
                         Console.WriteLine("S/N");
-                        opMorador = Console.ReadLine().ToLowerInvariant();
+                        opMorador = (Console.ReadLine() ?? "").ToLowerInvariant();
 
                         InserirMorador(nome, andar, apto);
 
@@ -71,15 +69,8 @@ public class MyClass
                     break;
 
                 case 3:
-                    /*int n = 1;
 
-                    foreach (String item in listaMoradores)
-                    {
-                        Console.WriteLine($"{n}º {item}");
-                        n++;
-                    }
-                    Console.WriteLine("\nAperte ENTER para Continuar");
-                    Console.ReadLine();*/
+                    ListarMoradores();
                     break;
 
                 default:
@@ -90,41 +81,64 @@ public class MyClass
     }
     static MySqlConnection Connection()
     {
-        String conexao = "Server=localhost;Database=db_predio;Uid=root;Pwd=;";
+
+        String conexao = "Server=localhost;Database=db_predio;Uid=root;Pwd=;";    
 
         MySqlConnection conn = new MySqlConnection(conexao);
         conn.Open();
-            
-        /*  
-            String querry = "SELECT * FROM db_moradores";
-
-            MySqlCommand cmd = new MySqlCommand(querry, con);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                Console.WriteLine(reader["nome_morador"]);
-            }
-        */
-
         return conn;
+
     }
 
     static void InserirMorador(String nome,int andar, int apto)
     {
-        using (var conn = Connection())
+        try
         {
-            String query = "INSERT INTO moradores (nome, andar, apto) VALUES (@nome, @andar, @apto)";
+            using (var conn = Connection())
+            {
+                String query = "INSERT INTO moradores (nome_morador, andar, apto) VALUES (@nome, @andar, @apto)";
 
-            var cmd = new MySqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@nome", nome);
-            cmd.Parameters.AddWithValue("@andar", andar);
-            cmd.Parameters.AddWithValue("@apto", apto);
-            
-            cmd.ExecuteNonQuery();
+                var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@nome", nome);
+                cmd.Parameters.AddWithValue("@andar", andar);
+                cmd.Parameters.AddWithValue("@apto", apto);
 
-            
+                cmd.ExecuteNonQuery();
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao Cadastrar o Usuario: {ex.Message}");
+        }
+
+    }
+
+    static void ListarMoradores()
+    {
+
+        try
+        {
+            using (var conn = Connection())
+            {
+                String query = "SELECT * FROM moradores";
+
+                var cmd = new MySqlCommand(query, conn);
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Console.WriteLine();
+                    Console.WriteLine($"Nome: {reader["nome_morador"]} Andar: {reader["andar"]} Apartamento: {reader["apto"]}");
+                }
+                Console.WriteLine("\nPressione ENTER");
+                Console.ReadLine();
+            }
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine($"Erro ao Consultar o Banco de Dados: {ex.Message}");
+        }
+
     }
 
 }
