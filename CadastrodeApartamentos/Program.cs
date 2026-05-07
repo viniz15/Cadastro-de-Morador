@@ -41,7 +41,6 @@ public class MyClass
             {
                 case 1:
                     String opMorador;
-
                     do
                     {
                         Console.WriteLine("Digite o nome do Morador: ");
@@ -59,13 +58,25 @@ public class MyClass
 
                     }
                     while (opMorador == "s");
-                    
-
                     break;
 
                 case 2:
-                    Console.WriteLine();
+                    do
+                    {
+                        Console.WriteLine("Digite o nome do Morador: ");
+                        String nomeEx = (Console.ReadLine() ?? "");
+                        Console.WriteLine("Digite o andar do Apartamento: ");
+                        int andarEx = int.Parse(Console.ReadLine());
+                        Console.WriteLine("Digiter o Numero do Apartamento: ");
+                        int aptoEx = int.Parse(Console.ReadLine());
 
+                        Console.WriteLine("Há mais algum Morador para cadastrar?");
+                        Console.WriteLine("S/N");
+                        opMorador = (Console.ReadLine() ?? "").ToLowerInvariant();
+
+                        ExcluirMoradores(nomeEx, andarEx, aptoEx);
+                    } 
+                    while (opMorador == "s");
                     break;
 
                 case 3:
@@ -139,6 +150,30 @@ public class MyClass
             Console.WriteLine($"Erro ao Consultar o Banco de Dados: {ex.Message}");
         }
 
+    }
+
+    static void ExcluirMoradores(String nomeEx, int andarEx, int aptoEx)
+    {
+        try
+        {
+            using(var conn = Connection())
+            {
+                String query = "DELETE FROM moradores WHERE nome_morador = @nomeEx AND andar = @andarEx AND apto = @aptoEx";
+
+                var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@nomeEx", nomeEx);
+                cmd.Parameters.AddWithValue("@andarEx", andarEx);
+                cmd.Parameters.AddWithValue("@aptoEx", aptoEx);
+
+                var nonQuery = cmd.ExecuteNonQuery();
+
+            }
+
+        } catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao Consultar o Banco de Dados: {ex.Message}");
+            Console.ReadLine();
+        }
     }
 
 }
